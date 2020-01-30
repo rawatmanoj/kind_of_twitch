@@ -1,4 +1,6 @@
 import React from 'react';
+import {connect} from 'react-redux';
+import {signIn,signOut} from '../actions';
 
 class GoogleAuth extends React.Component{
 
@@ -13,20 +15,28 @@ class GoogleAuth extends React.Component{
           }).then(()=>{
               this.auth=window.gapi.auth2.getAuthInstance();
               this.setState({isSignedIn:this.auth.isSignedIn.get()});
+              
               this.auth.isSignedIn.listen(this.onAuthChange);
           });
       });
 
     }
 
-    onAuthChange=()=>{
+    onAuthChange=(isSignedIn)=>{
         
-        this.setState({isSignedIn:this.auth.isSignedIn.get()});
+       // this.setState({isSignedIn:this.auth.isSignedIn.get()});
+              if(isSignedIn){
+                  this.props.signIn();
+              }
+              else{
+                this.props.signOut();
+              }
     }
 
 
 
      renderAuthButton(){
+        
          if(this.state.isSignedIn===null){
              return null;
          }else if(this.state.isSignedIn){
@@ -55,4 +65,10 @@ class GoogleAuth extends React.Component{
 
 }
 
-export default GoogleAuth;
+mapStateToProps=(state)=>{
+    return {
+        isSignedIn:state.auth.isSignedIn
+    };
+}
+
+export default connect(mapStateToProps,{signIn,signOut})(GoogleAuth);
